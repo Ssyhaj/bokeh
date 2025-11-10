@@ -25,16 +25,20 @@ export class CategoricalSliderView extends AbstractSliderView<string> {
       start: [this.model.value],
       step: 1,
       format: {
-        to: (value: number) => categories[value],
-        from: (value: string) => categories.indexOf(value),
+          to: (value: number): string => {
+              const idx = Math.round(value)
+              return categories[Math.min(Math.max(idx, 0), categories.length - 1)]
+          },
+          from: (value: string): number => categories.indexOf(value),
       },
     }
   }
 
-  protected _calc_from([value]: number[]): string {
+protected _calc_from([value]: number[]): string {
     const {categories} = this.model
-    return categories[value | 0] // value may not be an integer due to noUiSlider's FP math
-  }
+    const idx = Math.round(value)
+    return categories[Math.min(Math.max(idx, 0), categories.length - 1)]
+}
 
   pretty(value: number | string): string {
     return isNumber(value) ? this.model.categories[value] : value
