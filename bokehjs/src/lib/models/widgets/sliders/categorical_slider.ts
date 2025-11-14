@@ -22,26 +22,29 @@ export class CategoricalSliderView extends AbstractSliderView<string> {
         min: 0,
         max: categories.length - 1,
       },
-      start: [this.model.value],
+      start: [categories.indexOf(this.model.value)] as any,
       step: 1,
       format: {
-          to: (value: number): string => {
-              const idx = Math.round(value)
-              return categories[Math.min(Math.max(idx, 0), categories.length - 1)]
-          },
-          from: (value: string): number => categories.indexOf(value),
+        to: (value: number) => {
+          const index = Math.round(value)
+          const clamped = Math.max(0, Math.min(index, categories.length - 1))
+          return categories[clamped]
+        },
+        from: (value: string) => categories.indexOf(value),
       },
     }
   }
 
-protected _calc_from([value]: number[]): string {
+  protected _calc_from([value]: number[]): string {
     const {categories} = this.model
-    const idx = Math.round(value)
-    return categories[Math.min(Math.max(idx, 0), categories.length - 1)]
-}
+    return categories[Math.round(value)] // value may not be an integer due to noUiSlider's FP math
+  }
 
   pretty(value: number | string): string {
-    return isNumber(value) ? this.model.categories[value] : value
+    const index = Math.round(isNumber(value) ? value : parseFloat(value))
+    const {categories} = this.model
+    const clamped = Math.max(0, Math.min(index, categories.length - 1))
+    return categories[clamped]
   }
 }
 
