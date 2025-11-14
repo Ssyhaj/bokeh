@@ -25,7 +25,6 @@ export class CategoricalSliderView extends AbstractSliderView<string> {
       start: [categories.indexOf(this.model.value)] as any,
       step: 1,
       format: {
-
         to: (value: number) => {
           const index = Math.round(value)
           const clamped = Math.max(0, Math.min(index, categories.length - 1))
@@ -38,7 +37,7 @@ export class CategoricalSliderView extends AbstractSliderView<string> {
 
   protected _calc_from([value]: number[]): string {
     const {categories} = this.model
-    return categories[value | 0] // value may not be an integer due to noUiSlider's FP math
+    return categories[Math.round(value)] // value may not be an integer due to noUiSlider's FP math
   }
 
   pretty(value: number | string): string {
