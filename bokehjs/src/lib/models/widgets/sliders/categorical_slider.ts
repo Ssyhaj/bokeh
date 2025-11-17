@@ -17,15 +17,20 @@ export class CategoricalSliderView extends AbstractSliderView<string> {
 
   protected _calc_to(): SliderSpec<string> {
     const {categories} = this.model
+
+    // determine numeric start index and clamp it into valid range
+    const start_index = Math.max(0, Math.min(categories.indexOf(this.model.value), categories.length - 1))
+
     return {
       range: {
         min: 0,
         max: categories.length - 1,
       },
-      start: [categories.indexOf(this.model.value)] as any,
+      start: [start_index] as any,
       step: 1,
       format: {
         to: (value: number) => {
+          // value may be floating-point due to slider internals — round and clamp
           const index = Math.round(value)
           const clamped = Math.max(0, Math.min(index, categories.length - 1))
           return categories[clamped]
@@ -37,14 +42,22 @@ export class CategoricalSliderView extends AbstractSliderView<string> {
 
   protected _calc_from([value]: number[]): string {
     const {categories} = this.model
-    return categories[Math.round(value)] // value may not be an integer due to noUiSlider's FP math
+    // round and clamp to defend against FP imprecision
+    const index = Math.round(value)
+    const clamped = Math.max(0, Math.min(index, categories.length - 1))
+    return categories[clamped]
   }
 
   pretty(value: number | string): string {
-    const index = Math.round(isNumber(value) ? value : parseFloat(value))
     const {categories} = this.model
-    const clamped = Math.max(0, Math.min(index, categories.length - 1))
-    return categories[clamped]
+    if (isNumber(value)) {
+      const index = Math.round(value)
+      const clamped = Math.max(0, Math.min(index, categories.length - 1))
+      return categories[clamped]
+    } else {
+      // if a string (category name) was passed, return it unchanged
+      return value
+    }
   }
 }
 
